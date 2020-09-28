@@ -2,8 +2,6 @@
 
 
 
-[TOC]
-
 ## Introduction
 
 This repo is designed to get you up and running with MySQL in a limited amount of time to get some rapid hands-on experience with the technology through the convenience and reproducibility of a Docker container.

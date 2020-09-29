@@ -104,6 +104,14 @@ If you wish to tail the logs while the container is built and started for the fi
 docker logs mysql-test --tail all
 ```
 
+The process is finished when you see a message like this in the logs
+
+```bash
+2020-09-28T23:51:45.022291Z 0 [System] [MY-010931] [Server] /usr/sbin/mysqld: ready for connections. Version: '8.0.21'  socket: '/var/run/mysqld/mysqld.sock'  port: 3306  MySQL Community Server - GPL.
+```
+
+
+
 You can now see if the container is running
 
 ```bash
@@ -119,7 +127,13 @@ Review where the MySQL data lives on disk by getting a Bash shell on the contain
 (note: you should be able to see the 'employees' database directory that was loaded with the container - feel free to explore)
 
 ```bash
-docker exec -it mysql-test bash && cd /var/lib/mysql/ 
+docker exec -it mysql-test bash
+```
+
+Navigate to the data directory in the container
+
+```bash
+cd /var/lib/mysql/
 ```
 
 Exit the bash terminal once you're done poking around  
@@ -132,7 +146,7 @@ exit
 
 ### Getting a MySQL Client on the Command Line
 
-You can get access to the MySQL command line client by executing the following.
+You can get access to the MySQL command line client by executing the following. (The root password set in a previous step is *secretpwd*)
 
 ```bash
 docker exec -it mysql-test mysql -uroot -p
@@ -148,13 +162,29 @@ docker exec -it mysql-test mysql -uroot -p
 
 
 
+Show all of the available databases
+
+```mysql
+SHOW DATABASES;
+USE employees;
+SELECT * FROM departments;
+```
+
+Exit the mysql shell
+
+```bash
+exit
+```
+
+
+
 ### Accessing the Container through an External Application (Workbench/Data Grip, etc)
 
 You can access the database in the docker container from a client on your local machine such as MySQLWorkbench or Data Grip, etc by specifying the host as `0.0.0.0` and port as `3306`
 
 There are two users that are configured to have access from any host and those are `root` and `guest` which was initialized during the container creation (see `/data` directory in this repo in `init_users.sql`). The password for guest is `guestpwd`. The `guest` user only has full privileges on the `employees` database.
 
-You can review the users created by issuing the following sql:
+You can review the users created by issuing the following sql from the mysql shell or through an external connection:
 
 ```mysql
 SELECT host, user FROM mysql.user;
@@ -171,7 +201,7 @@ SHOW GRANTS FOR 'guest'@'%';
 Get a list of all departments in the database
 
 ```mysql
-SELECT * FROM employees.departments d
+SELECT * FROM employees.departments d;
 ```
 
 
@@ -190,27 +220,28 @@ SELECT e.emp_no,
 FROM employees.salaries s
 JOIN employees.employees e ON e.emp_no = s.emp_no
 ORDER BY s.salary DESC
-LIMIT 1
+LIMIT 1;
 ```
 
 
 
-Show the most frequent employee last names in descending order
+Show the 10 most frequent employee last names in descending order
 
 ```mysql
 SELECT e.last_name, 
        COUNT(e.last_name) AS 'last_name_count' 
 FROM employees.employees e
 GROUP BY e.last_name
-ORDER BY last_name_count DESC;
+ORDER BY last_name_count DESC
+LIMIT 10;
 ```
 
 
 
-The most frequent last name in the company is "Baba" so let's take a look at all of those employee records
+The most frequent last name in the company is "Baba" so let's take a look at 20 of those employee records
 
 ```mysql
-SELECT * FROM employees.employees WHERE last_name = 'Baba';
+SELECT * FROM employees.employees WHERE last_name = 'Baba' LIMIT 20;
 ```
 
 

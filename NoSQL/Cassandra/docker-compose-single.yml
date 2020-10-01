@@ -1,0 +1,18 @@
+#references
+#https://medium.com/@kayaerol84/cassandra-cluster-management-with-docker-compose-40265d9de076
+#https://github.com/imalik8088/cassandra-spark
+#https://hub.docker.com/_/cassandra
+#https://mannekentech.com/2017/01/02/playing-with-a-cassandra-cluster-via-docker/
+#https://mannekentech.com/2017/11/11/playing-with-docker-and-cassandra/
+
+version: '3'
+services:
+    node1:
+        image: cassandra:3.11.8
+        container_name: cassandra-single
+        # This preserves data across container restarts.
+        volumes:
+            - ./data/cassandra-single:/var/lib/cassandra # persist data for node
+            - ./data/musicdb:/home/data/musicdb # sample data
+        ports:
+            - 9042:9042

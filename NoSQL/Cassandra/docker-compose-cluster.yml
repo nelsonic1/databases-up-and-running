@@ -1,0 +1,66 @@
+#references
+#https://medium.com/@kayaerol84/cassandra-cluster-management-with-docker-compose-40265d9de076
+#https://github.com/imalik8088/cassandra-spark
+#https://hub.docker.com/_/cassandra
+#https://mannekentech.com/2017/01/02/playing-with-a-cassandra-cluster-via-docker/
+#https://mannekentech.com/2017/11/11/playing-with-docker-and-cassandra/
+#https://digitalis.io/blog/containerized-cassandra-cluster-for-local-testing/
+#https://teddyma.gitbooks.io/learncassandra/content/
+
+version: '3'
+services:
+# If you see exit code 137 (OOM killer) then ensure Docker has access to more resources (4GB Mem+)
+    node1:
+        image: cassandra:3.11.8
+        container_name: cassandra1
+        hostname: node1
+        networks:
+            - cassandra
+        volumes:
+            - ./data/musicdb:/home/data/musicdb # sample data
+            - ./data/cassandra1:/var/lib/cassandra # persist data for node
+            - ./config/cassandra1:/etc/cassandra #custom config
+        # Declare and save environments variables into "environment"
+        environment: &environment
+            CASSANDRA_SEEDS: "cassandra1"
+            CASSANDRA_CLUSTER_NAME: cassandra_test_cluster
+            CASSANDRA_DC: DC1
+            CASSANDRA_RACK: RAC1
+            CASSANDRA_ENDPOINT_SNITCH: GossipingPropertyFileSnitch
+            CASSANDRA_NUM_TOKENS: 128
+        ports:
+            - 9042:9042
+    node2:
+        image: cassandra:3.11.8
+        container_name: cassandra2
+        hostname: node2
+        command: bash -c 'sleep 60;  /docker-entrypoint.sh cassandra -f'
+        networks:
+            - cassandra
+        volumes:
+            - ./data/cassandra2:/var/lib/cassandra # persist data for node
+            - ./config/cassandra2:/etc/cassandra # custom config
+        # point to "environment" to use the same environment variables as cassandra1
+        environment: *environment
+        ports:
+            - 9043:9042
+        depends_on:
+            - node1
+    node3:
+        image: cassandra:3.11.8
+        container_name: cassandra3
+        hostname: node3
+        command: bash -c 'sleep 60;  /docker-entrypoint.sh cassandra -f'
+        networks:
+            - cassandra
+        volumes:
+            - ./data/cassandra3:/var/lib/cassandra # persist data for node
+            - ./config/cassandra3:/etc/cassandra #custom config
+        # point to "environment" to use the same environment variables as cassandra1
+        environment: *environment
+        ports:
+            - 9044:9042
+        depends_on:
+            - node2
+networks:
+    cassandra:

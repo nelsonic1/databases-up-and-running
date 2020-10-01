@@ -1,5 +1,7 @@
 # MySQL
 
+[TOC]
+
 
 
 ## Introduction
@@ -178,7 +180,7 @@ exit
 
 
 
-### Accessing the Container through an External Application (Workbench/Data Grip, etc)
+### Accessing the Container Through an External Application
 
 You can access the database in the docker container from a client on your local machine such as MySQLWorkbench or Data Grip, etc by specifying the host as `0.0.0.0` and port as `3306`
 

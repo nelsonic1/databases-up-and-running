@@ -1,12 +1,3 @@
-#references
-#https://medium.com/@kayaerol84/cassandra-cluster-management-with-docker-compose-40265d9de076
-#https://github.com/imalik8088/cassandra-spark
-#https://hub.docker.com/_/cassandra
-#https://mannekentech.com/2017/01/02/playing-with-a-cassandra-cluster-via-docker/
-#https://mannekentech.com/2017/11/11/playing-with-docker-and-cassandra/
-#https://digitalis.io/blog/containerized-cassandra-cluster-for-local-testing/
-#https://teddyma.gitbooks.io/learncassandra/content/
-
 version: '3'
 services:
 # If you see exit code 137 (OOM killer) then ensure Docker has access to more resources (4GB Mem+)

@@ -188,6 +188,35 @@ UN  172.30.0.3  70.45 KiB  3            78.9%             84fd2ae1-41e9-4c85-93d
 
 If you are starting the cluster after the first run, you may see some nodes reporting status of `DN`, this is ok and expected. Keep running the command and you should see them automatically change to `UN`.
 
+**Check Cluster Info**
+
+```bash
+nodetool info
+```
+
+You will get a lot of information back about your cluster. Pay attention to Gossip Active and Thrift Active
+
+```bash
+ID                     : 118a6488-d19a-49e9-8b22-435106ea1663
+Gossip active          : true
+Thrift active          : true
+Native Transport active: true
+Load                   : 4.24 MiB
+Generation No          : 1601596139
+Uptime (seconds)       : 196
+Heap Memory (MB)       : 323.16 / 1952.00
+Off Heap Memory (MB)   : 0.06
+Data Center            : DC1
+Rack                   : RAC1
+Exceptions             : 0
+Key Cache              : entries 27, size 2.28 KiB, capacity 97 MiB, 87 hits, 122 requests, 0.713 recent hit rate, 14400 save period in seconds
+Row Cache              : entries 0, size 0 bytes, capacity 0 bytes, 0 hits, 0 requests, NaN recent hit rate, 0 save period in seconds
+Counter Cache          : entries 0, size 0 bytes, capacity 48 MiB, 0 hits, 0 requests, NaN recent hit rate, 7200 save period in seconds
+Chunk Cache            : entries 24, size 1.5 MiB, capacity 456 MiB, 60 misses, 237 requests, 0.747 recent hit rate, 910.351 microseconds miss latency
+Percent Repaired       : 0.0%
+Token                  : (invoke with -T/--tokens to see all 128 tokens)
+```
+
 
 
 ## Configuration
@@ -224,8 +253,16 @@ To get a bash shell on this container you can run the following and replacing <c
 
 Likely you will want to connect to `cassandra1` as that has our local data volume mounted to it and then you can load data. See the docker-compose file for more information. 
 
+**Single Node**
+
 ```bash
-docker exec -it <container> bash
+docker exec -it cassandra-single bash
+```
+
+**Three Node**
+
+```bash
+docker exec -it cassandra1 bash
 ```
 
 If you wish to see where the data is stored, you can navigate to it at /var/lib/cassandra:
@@ -289,7 +326,7 @@ The second file `data.cql` will issue all of the `COPY` commands to load data fr
 Now from the `cqlsh` command prompt run. For further information, review the [Getting a Bash Shell](#Getting a Bash Shell ) section.
 
 ```cql
-SOURCE 'home/data/musicdb/schema.cql';
+SOURCE '/home/data/musicdb/schema.cql';
 ```
 
 You will get no confirmation that this did anything but we can check the results.
@@ -315,7 +352,7 @@ DESCRIBE KEYSPACE musicdb;
 Now, again from `cqlsh` let's load the data by running the following:
 
 ```CQL
-SOURCE 'home/data/musicdb/data.cql';
+SOURCE '/home/data/musicdb/data.cql';
 ```
 
 You will see some progress messages like the following:
@@ -378,7 +415,7 @@ SELECT title, year, genre, performer FROM musicdb.album WHERE title = 'Deftones'
 Albums by Performer
 
 ```CQL
-SELECT title, year, genre, performer FROM musicdb.albums_by_performer WHERE performer = 'Deftones';
+SELECT title, year, genre, performer FROM musicdb.albums_by_performer WHERE performer = 'Sunny Day Real Estate';
 ```
 
 Albums by Genre
@@ -409,6 +446,12 @@ SELECT * FROM musicdb.tracks_by_album WHERE album_title = 'Rumours' and year = 1
 
 You may connect to Cassandra in your container through 0.0.0.0/9042 with no user and no password. This is possible as port 9042 is exposed to the host machine in the docker-compose yaml files.
 
+If you have launched a 3 node cluster, you can access through any of 9042, 9043, 9044 for cassandra 1, cassanra2, cassandra3 respectively. Any node can accept queries and insert data. The data will automatically be replicated to the other 2 nodes due to the replication factor of 3 described in the `schema.cql` file
+
+```cql
+CREATE KEYSPACE IF NOT EXISTS musicdb WITH replication = {'class':'SimpleStrategy','replication_factor':3};
+```
+
 
 
 # Teardown and Next Steps
@@ -416,6 +459,18 @@ You may connect to Cassandra in your container through 0.0.0.0/9042 with no user
 ## Tear Down
 
 In order to tear down each cluster, you should use `docker-compose -f <file> down`.
+
+**Single Node**
+
+```bash
+docker-compose -f docker-compose-single.yml down
+```
+
+**Three Node**
+
+```bash
+docker-compose -f docker-compose-cluster.yml down
+```
 
 If your data gets corrupted and you would like to start over, remove all of the sub-directories as follows for each of the parent directories under data for the node(s) you are concerned with. For example for `cassandra1` you would delete the following directories under `/data/cassandra1`:
 
@@ -434,6 +489,8 @@ This effectively removes any previously persisted data for that container. Next 
 - [DataStax Documentation](https://docs.datastax.com/en/landing_page/doc/landing_page/cassandra.html)
 - [Learn Cassandra gitbook](https://teddyma.gitbooks.io/learncassandra/content/) (This is for older versions of Cassandra but still has valuable information)
 - Seek out additional resources about designing schemas for Cassandra
+- Insert some of your own data into the tables in the musicdb.
+- Write some advanced queries
 
 
 

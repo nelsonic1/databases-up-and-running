@@ -1,6 +1,6 @@
 DROP KEYSPACE IF EXISTS musicdb;
 
-CREATE KEYSPACE IF NOT EXISTS musicdb WITH replication = {'class':'SimpleStrategy','replication_factor':};
+CREATE KEYSPACE IF NOT EXISTS musicdb WITH replication = {'class':'SimpleStrategy','replication_factor':3};
 
 USE musicdb;
 

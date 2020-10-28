@@ -1,0 +1,111 @@
+version: "3"
+services:
+    zookeeper:
+        container_name: clickhouse-zookeeper
+        hostname: clickhouse-zookeeper
+        image: zookeeper:3.6.2
+        ports:
+            - 2181:2181
+            - 2182:2182
+        networks:
+            clickhouse-network:
+                ipv4_address: 172.23.0.10
+    clickhouse1:
+        container_name: clickhouse1
+        hostname: clickhouse1
+        image: yandex/clickhouse-server:20.9.3.45
+        volumes: 
+            - ./data/clickhouse1:/var/lib/clickhouse # persist data outside of container
+            - ./config/config.xml:/etc/clickhouse-server/config.xml # config
+            - ./config/metrika.xml:/etc/clickhouse-server/metrika.xml # config replacements
+            - ./config/users.xml:/etc/clickhouse-server/users.xml # users
+            - ./config/macros/clickhouse1-macros.xml:/etc/clickhouse-server/config.d/macros.xml # macros
+            - ./data/airline-ontime:/home/ontime-data # data for loading into db
+            - ./scripts/replicated:/docker-entrypoint-initdb.d # script to initialize db
+        ports:
+            - 9000:9000 # native tcp/ip
+            - 8123:8123 # http
+        cap_add:
+            - IPC_LOCK
+            - NET_ADMIN
+        networks:
+            clickhouse-network:
+                ipv4_address: 172.23.0.11
+        depends_on:
+            - zookeeper
+    clickhouse2:
+        container_name: clickhouse2
+        hostname: clickhouse2
+        image: yandex/clickhouse-server:20.9.3.45
+        volumes: 
+            - ./data/clickhouse2:/var/lib/clickhouse
+            - ./config/config.xml:/etc/clickhouse-server/config.xml
+            - ./config/metrika.xml:/etc/clickhouse-server/metrika.xml
+            - ./config/users.xml:/etc/clickhouse-server/users.xml # users
+            - ./config/macros/clickhouse2-macros.xml:/etc/clickhouse-server/config.d/macros.xml
+            - ./data/airline-ontime:/home/ontime-data
+            - ./scripts/replicated/create_db.sql:/docker-entrypoint-initdb.d/create_db.sql # script to initialize db
+        ports:
+            - 9001:9000 # native tcp/ip
+            - 8124:8123 # http
+        cap_add:
+            - IPC_LOCK
+            - NET_ADMIN
+        networks:
+            clickhouse-network:
+                ipv4_address: 172.23.0.12
+        depends_on:
+            - zookeeper
+    clickhouse3:
+        container_name: clickhouse3
+        hostname: clickhouse3
+        image: yandex/clickhouse-server:20.9.3.45
+        volumes: 
+            - ./data/clickhouse3:/var/lib/clickhouse
+            - ./config/config.xml:/etc/clickhouse-server/config.xml
+            - ./config/metrika.xml:/etc/clickhouse-server/metrika.xml
+            - ./config/users.xml:/etc/clickhouse-server/users.xml # users
+            - ./config/macros/clickhouse3-macros.xml:/etc/clickhouse-server/config.d/macros.xml
+            - ./data/airline-ontime:/home/ontime-data
+            - ./scripts/replicated:/docker-entrypoint-initdb.d # script to initialize db
+        ports:
+            - 9002:9000 # native tcp/ip
+            - 8125:8123 # http
+        cap_add:
+            - IPC_LOCK
+            - NET_ADMIN
+        networks:
+            clickhouse-network:
+                ipv4_address: 172.23.0.13
+        depends_on:
+            - zookeeper
+    clickhouse4:
+        container_name: clickhouse4
+        hostname: clickhouse4
+        image: yandex/clickhouse-server:20.9.3.45
+        volumes: 
+            - ./data/clickhouse4:/var/lib/clickhouse
+            - ./config/config.xml:/etc/clickhouse-server/config.xml
+            - ./config/metrika.xml:/etc/clickhouse-server/metrika.xml
+            - ./config/users.xml:/etc/clickhouse-server/users.xml # users
+            - ./config/macros/clickhouse4-macros.xml:/etc/clickhouse-server/config.d/macros.xml
+            - ./data/airline-ontime:/home/ontime-data
+            - ./scripts/replicated/create_db.sql:/docker-entrypoint-initdb.d/create_db.sql # script to initialize db
+        ports:
+            - 9003:9000 # native tcp/ip
+            - 8126:8123 # http
+        cap_add:
+            - IPC_LOCK
+            - NET_ADMIN
+        networks:
+            clickhouse-network:
+                ipv4_address: 172.23.0.14
+        depends_on:
+            - zookeeper
+
+networks:
+    clickhouse-network:
+        ipam:
+            config:
+                - subnet: 172.23.0.0/24
+

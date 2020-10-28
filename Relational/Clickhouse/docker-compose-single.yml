@@ -1,0 +1,15 @@
+version: '3'
+services:
+    clickhouse:
+        image: yandex/clickhouse-server:20.9.2.20
+        container_name: clickhouse-single
+        volumes:
+            - ./data/clickhouse-single:/var/lib/clickhouse
+            - ./data/airline-ontime:/home/ontime-data
+            - ./config/users.xml:/etc/clickhouse-server/users.xml
+            - ./scripts/non-replicated:/docker-entrypoint-initdb.d
+        ports:
+            - 9000:9000 # native tcp/ip
+            - 8123:8123 # http
+
+

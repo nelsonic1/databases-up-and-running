@@ -1,0 +1,11 @@
+version: '3'
+services:
+    redis-server:
+        image: redis:6.0.9
+        container_name: redis
+        volumes:
+            - ./data:/data
+        ports:
+            - 6379:6379
+
+

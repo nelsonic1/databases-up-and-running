@@ -10,7 +10,7 @@ services:
         volumes:
             - ./data/musicdb:/home/data/musicdb # sample data
             - ./data/cassandra1:/var/lib/cassandra # persist data for node
-            - ./config/cassandra1:/etc/cassandra #custom config
+            - ./config/cassandra1:/etc/cassandra # custom config
         # Declare and save environments variables into "environment"
         environment: &environment
             CASSANDRA_SEEDS: "cassandra1"
